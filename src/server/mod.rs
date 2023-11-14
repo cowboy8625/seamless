@@ -12,6 +12,7 @@ pub async fn spawn(host: String, port: String) {
     std::thread::spawn(move || {
         if let Err(error) = listen(move |evt: Event| {
             tx.send(evt).unwrap();
+            std::thread::sleep(std::time::Duration::from_millis(100));
         }) {
             println!("Error: {:?}", error)
         }
@@ -38,7 +39,6 @@ pub async fn spawn(host: String, port: String) {
             return;
         };
         eprintln!("Sent event: {:?}", current_event.event_type);
-        std::thread::sleep(std::time::Duration::from_millis(100));
     }
 }
 
