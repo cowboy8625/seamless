@@ -1,5 +1,5 @@
 use rdev::Event;
-use tokio::net::TcpStream;
+use tokio::{net::TcpStream, io::AsyncReadExt};
 
 pub async fn spawn(host: String, port: String) {
     println!("Client started on {}:{}", host, port);
@@ -12,8 +12,8 @@ pub async fn spawn(host: String, port: String) {
         eprintln!("Failed to connect");
         return;
     };
-    let mut buf = Vec::new();
     loop {
+        let mut buf = Vec::new();
         let Ok(_) = stream.readable().await else {
             continue;
         };
@@ -30,7 +30,6 @@ pub async fn spawn(host: String, port: String) {
             eprintln!("Failed to deserialize event");
             continue;
         };
-        buf.clear();
 
         crate::event::send(&event.event_type);
     }
