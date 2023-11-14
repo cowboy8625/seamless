@@ -7,12 +7,16 @@ use tokio::{
 
 pub async fn spawn(host: String, port: String) {
     let lisener = TcpListener::bind(format!("{host}:{port}")).await.unwrap();
+    let Ok((width, height)) = rdev::display_size() else {
+        // TODO: Handle error
+        eprintln!("Failed to get display size");
+        return;
+    };
     println!("Server started on {}:{}", host, port);
     let (tx, mut rx) = unbounded_channel();
     std::thread::spawn(move || {
         if let Err(error) = listen(move |evt: Event| {
             tx.send(evt).unwrap();
-            std::thread::sleep(std::time::Duration::from_millis(100));
         }) {
             println!("Error: {:?}", error)
         }
@@ -31,14 +35,14 @@ pub async fn spawn(host: String, port: String) {
         eprintln!("Current event: {:?}", current_event);
         let Ok(serialized) = bincode::serialize(&current_event) else {
             // TODO: Handle error
+            eprintln!("Failed to serialize event");
             return;
         };
-        let Ok(()) = writer.write_all(&serialized).await else {
-            // TODO: Handle error
-            eprintln!("Failed to write");
-            return;
-        };
-        eprintln!("Sent event: {:?}", current_event.event_type);
+        eprintln!("{:?}", current_event.event_type);
+        // let Ok(()) = writer.write_all(&serialized).await else {
+        //     // TODO: Handle error
+        //     return;
+        // };
     }
 }
 
