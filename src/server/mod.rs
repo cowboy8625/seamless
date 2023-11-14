@@ -37,7 +37,8 @@ pub async fn spawn(host: String, port: String) {
             eprintln!("Failed to write");
             return;
         };
-        eprintln!("Sent event: {:?}", current_event);
+        eprintln!("Sent event: {:?}", current_event.event_type);
+        std::thread::sleep(std::time::Duration::from_millis(100));
     }
 }
 

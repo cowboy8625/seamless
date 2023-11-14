@@ -17,13 +17,21 @@ pub async fn spawn(host: String, port: String) {
         let Ok(_) = stream.readable().await else {
             continue;
         };
+
         let Ok(_) = stream.try_read_buf(&mut buf) else {
             continue;
         };
+
         if buf.is_empty() {
             continue;
         }
-        eprintln!("Client: {:?}", bincode::deserialize::<Event>(&buf));
+
+        let Ok(event) = bincode::deserialize::<Event>(&buf) else {
+            eprintln!("Failed to deserialize event");
+            continue;
+        };
         buf.clear();
+
+        crate::event::send(&event.event_type);
     }
 }
