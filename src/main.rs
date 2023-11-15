@@ -1,3 +1,4 @@
+mod mouse;
 mod event;
 mod server;
 mod client;
@@ -51,6 +52,14 @@ enum Commands {
         )]
         port: String,
     },
+}
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Size {
+    pub width: u64,
+    pub height: u64,
 }
 
 #[tokio::main]
