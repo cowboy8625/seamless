@@ -1,5 +1,6 @@
+use crate::mouse::{ScreenSide, Mouse};
 use super::Size;
-use rdev::{Event, grab};
+use rdev::{EventType, Event, grab};
 use tokio::{
     io::AsyncWriteExt,
     net::TcpListener,
@@ -7,7 +8,9 @@ use tokio::{
 };
 
 fn event_handler(tx: UnboundedSender<Event>, event: Event) -> Option<Event> {
-    tx.send(event.clone()).unwrap();
+    if tx.send(event.clone()).is_err() {
+        eprintln!("Failed to send event");
+    }
     Some(event)
 }
 
@@ -73,22 +76,46 @@ pub async fn spawn(host: String, port: String) {
     };
     eprintln!("size of client screen: w: {}, h: {}", size.width, size.height);
 
+    let _off_screen_mouse: Option<Mouse> = None;
+    // Some(Mouse {
+    //     screen_side: ScreenSide::Left,
+    //     x: 0.0,
+    //     y: 0.0,
+    //     width: size.width as f32,
+    //     height: size.height as f32,
+    // });
+
     loop {
         let Ok(current_event) = rx.try_recv() else {
             // TODO: Handle error
             continue;
         };
-        eprintln!("Current event: {:?}", current_event);
-        let Ok(serialized) = bincode::serialize(&current_event) else {
-            // TODO: Handle error
-            eprintln!("Failed to serialize event");
-            return;
-        };
-        eprintln!("{:?}", current_event.event_type);
-        let Ok(()) = writer.write_all(&serialized).await else {
-            // TODO: Handle error
-            return;
-        };
+        match current_event.event_type {
+            EventType::MouseMove { x, y, .. } if x == 0.0 => {
+                println!("{:?} {x} {y}", ScreenSide::Left);
+            }
+            EventType::MouseMove { x, y, .. } if x == server_screen_size.width as f64 => {
+                println!("{:?} {x} {y}", ScreenSide::Right);
+            }
+            EventType::MouseMove { x, y, .. } if y == 0.0 => {
+                println!("{:?} {x} {y}", ScreenSide::Top);
+            }
+            EventType::MouseMove { x, y, .. } if y == server_screen_size.height as f64 => {
+                println!("{:?} {x} {y}", ScreenSide::Bottom);
+            }
+            _ => {}
+        }
+        // eprintln!("Current event: {:?}", current_event);
+        // let Ok(serialized) = bincode::serialize(&current_event) else {
+        //     // TODO: Handle error
+        //     eprintln!("Failed to serialize event");
+        //     return;
+        // };
+        // eprintln!("{:?}", current_event.event_type);
+        // let Ok(()) = writer.write_all(&serialized).await else {
+        //     // TODO: Handle error
+        //     return;
+        // };
     }
 }
 

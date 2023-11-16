@@ -1,5 +1,5 @@
 #[derive(Debug)]
-enum ScreenSide {
+pub enum ScreenSide {
     Left,
     Right,
     Top,
@@ -7,7 +7,7 @@ enum ScreenSide {
 }
 
 #[derive(Debug)]
-struct Mouse {
+pub struct Mouse {
     pub screen_side: ScreenSide,
     pub x: f32,
     pub y: f32,
