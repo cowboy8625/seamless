@@ -91,16 +91,16 @@ pub async fn spawn(host: String, port: String) {
             continue;
         };
         match current_event.event_type {
-            EventType::MouseMove { x, y, .. } if x == 0.0 => {
+            EventType::MouseMove { x, y, .. } if (x as u64) <= 0 => {
                 println!("{:?} {x} {y}", ScreenSide::Left);
             }
-            EventType::MouseMove { x, y, .. } if x == server_screen_size.width as f64 => {
+            EventType::MouseMove { x, y, .. } if (x as u64) >= server_screen_size.width - 1 => {
                 println!("{:?} {x} {y}", ScreenSide::Right);
             }
-            EventType::MouseMove { x, y, .. } if y == 0.0 => {
+            EventType::MouseMove { x, y, .. } if (y as u64) <= 0 => {
                 println!("{:?} {x} {y}", ScreenSide::Top);
             }
-            EventType::MouseMove { x, y, .. } if y == server_screen_size.height as f64 => {
+            EventType::MouseMove { x, y, .. } if (y as u64) >= server_screen_size.height - 1 => {
                 println!("{:?} {x} {y}", ScreenSide::Bottom);
             }
             _ => {}
